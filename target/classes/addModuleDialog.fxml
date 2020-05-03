@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<DialogPane
+            fx:id="dialogPane"
+            xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.breit.curriculumrechner.AddModuleDialogController"
+            prefHeight="400.0" prefWidth="800.0">
+    <headerText>
+        Add a whole Module
+    </headerText>
+    <content>
+        <VBox fx:id="root" spacing="15">
+            <HBox spacing="10">
+                <Label text="Module name:" />
+                <TextField fx:id="moduleNameField" maxWidth="200"/>
+                <Label text="Module color" />
+                <ColorPicker fx:id="colorPickerField"/>
+                <Button fx:id="addCourseButton" text="add course" onAction="#click"/>
+<!--                <Button fx:id="addCourseButton" text="add Course" onAction="#addCourseHBox"/>-->
+            </HBox>
+
+<!--            <HBox spacing="10">-->
+<!--                <Label text="Course name: " alignment="CENTER"/>-->
+<!--                <TextField fx:id="courseNameField" />-->
+<!--                <Label text="Ects: " />-->
+<!--                <TextField fx:id="courseEctsField" />-->
+<!--                <Button fx:id="addCourseButton" text="add Course" onAction="#addCourseHBox"/>-->
+<!--            </HBox>-->
+        </VBox>
+    </content>
+</DialogPane>

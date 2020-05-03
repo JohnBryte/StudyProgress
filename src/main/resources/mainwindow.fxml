@@ -1,0 +1,44 @@
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.TilePane?>
+<?import javafx.scene.layout.VBox?>
+<BorderPane fx:id="mainBorderPane" fx:controller="com.breit.curriculumrechner.Controller"
+            xmlns:fx="http://javafx.com/fxml">
+    <top>
+        <MenuBar>
+            <Menu text="File">
+                <items>
+                    <MenuItem text="New" onAction="#addCurriculumRechner"/>
+                    <MenuItem text="Open" onAction="#openFile"/>
+                    <MenuItem text="Save" onAction="#saveFile"/>
+                    <MenuItem text="Exit"/>
+                </items>
+            </Menu>
+            <Menu fx:id="editMenu" text="Edit">
+                <items>
+                    <MenuItem text="Add Course" onAction="#showAddCourseDialog"/>
+                    <SeparatorMenuItem/>
+                    <MenuItem text="Edit Course"/>
+                    <SeparatorMenuItem/>
+                    <MenuItem text="Add Module" onAction="#showAddModuleDialog"/>
+                </items>
+            </Menu>
+        </MenuBar>
+    </top>
+    <right>
+        <VBox style="-fx-background-color: white" >
+            <TreeView fx:id="courseTreeView" showRoot="false">
+            </TreeView>
+            <HBox style="-fx-background-color: white">
+                <Label text="Total Ects: "/>
+                <Label fx:id="ectsCounter"/>
+                <Label text="/180"/>
+            </HBox>
+        </VBox>
+    </right>
+    <center>
+        <TilePane hgap="10" vgap="10" fx:id="tilePane">
+        </TilePane>
+    </center>
+</BorderPane>

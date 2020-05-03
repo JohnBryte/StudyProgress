@@ -1,0 +1,5 @@
+STEOP Kurs1 6 RED
+STEOP Kurs2 4 RED
+STEOP Kurs3 4 RED
+Grammatik Uebung 3 BLUE
+Grammatik Vorlesung 3 BLUE
