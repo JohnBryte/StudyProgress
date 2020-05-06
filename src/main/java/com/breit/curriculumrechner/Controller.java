@@ -36,7 +36,7 @@ import java.util.*;
 
 public class Controller {
     private Set<String> allModules = new HashSet<>();
-    private int ectsTotal = 0;
+    private int ectsEarned = 0;
     @FXML
     private TreeView courseTreeView;
     @FXML
@@ -47,6 +47,8 @@ public class Controller {
     private BorderPane mainBorderPane;
     @FXML
     private Menu editMenu;
+    @FXML
+    private Label ectsTotal;
 
     private final ContextMenu contextMenu = new ContextMenu();
 
@@ -61,24 +63,12 @@ public class Controller {
                 }, root.getChildren()
         ));
 
-        defineContextmenu();
-
         if(CourseData.getInstance().getCourses() != null){
             loadCoursesIntoPane();
         }
 
         // set the cell factory
         courseTreeView.setCellFactory(CheckBoxTreeCell.forTreeView());
-    }
-
-    private void defineContextmenu(){
-        MenuItem delete = new MenuItem("Delete");
-        delete.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-
-            }
-        });
     }
 
     private void loadCoursesIntoPane(){
@@ -99,7 +89,7 @@ public class Controller {
         // set the cell factory
 //        courseTreeView.setCellFactory(CheckBoxTreeCell.forTreeView());
         calculateEcts(courseTreeView.getRoot());
-        ectsCounter.setText(Integer.toString(ectsTotal));
+        ectsCounter.setText(Integer.toString(ectsEarned));
     }
 
 /*    private void addCourseToModuleParentInCheckBoxTree(String module) {
@@ -141,7 +131,7 @@ public class Controller {
             public void handle(CheckBoxTreeItem.TreeModificationEvent<Object> objectTreeModificationEvent) {
 //                        courseClicked(course.getModuleName(), course.getCourseName());
                 tickOffCourse(currentCourse);
-                ectsCounter.setText(Integer.toString(ectsTotal));
+                ectsCounter.setText(Integer.toString(ectsEarned));
             }
         });
         return currentCourse;
@@ -321,9 +311,9 @@ public class Controller {
             setTitleOfModule(moduleStack, module.getValue().toString());
 
             moduleStack.setId("moduleStack" + module.getValue().toString());
-            for(TreeItem<Object> course : module.getChildren()){
+            for(Course currentCourse : CourseData.getInstance().getCourses().get(module.getValue())){
                 StackPane coursePane = new StackPane();
-                Course currentCourse = (Course) course.getValue();
+//                Course currentCourse = (Course) course.getValue();
                 // RECTANGLE of course
                 Rectangle rect = drawRectangle(currentCourse);
                 //description on coursePane rectangle
@@ -342,6 +332,15 @@ public class Controller {
     private void createDescription(StackPane stackPane, Course course, Rectangle rect) {
         stackPane.setId("stackPane" + course.getModuleName() + course.getCourseName());
         Text text = new Text(course.getCourseName() + "\n" + course.getEcts() + " Ects");
+        if(backgroundIsDark(course)){
+            System.out.println("YES IS DARK");
+            text.setFill(Color.WHITE);
+//            text.setStroke(Color.BLACK);
+//            text.setStrokeWidth(0.01);
+        } else {
+            System.out.println("YES IS LIGHT");
+            text.setFill(Color.BLACK);
+        }
         text.setTextAlignment(TextAlignment.CENTER);
         stackPane.getChildren().add(rect);
         stackPane.getChildren().add(text);
@@ -432,10 +431,10 @@ public class Controller {
     private void tickOffCourse(CheckBoxTreeItem<Object> currentCourse){
         Course course = (Course) currentCourse.getValue();
         if(currentCourse.isSelected()){
-            ectsTotal += course.getEcts();
+            ectsEarned += course.getEcts();
             tilePane.lookup("#cross" + course.getModuleName().replaceAll("\\s","") + course.getCourseName().replaceAll("\\s","")).setOpacity(1);
         } else {
-            ectsTotal -= course.getEcts();
+            ectsEarned -= course.getEcts();
             tilePane.lookup("#cross" + course.getModuleName().replaceAll("\\s","") + course.getCourseName().replaceAll("\\s","")).setOpacity(-1);
         }
     }
@@ -445,7 +444,7 @@ public class Controller {
             if(child.getChildren().isEmpty()){
                 CheckBoxTreeItem<Course> temp = (CheckBoxTreeItem<Course>) child;
                 if(temp.isSelected()){
-                    ectsTotal += temp.getValue().getEcts();
+                    ectsEarned += temp.getValue().getEcts();
                 }
             } else{
                 calculateEcts(child);
@@ -556,18 +555,26 @@ public class Controller {
 
     @FXML
     private void addCurriculumRechner(){
-        allModules.clear();
-        tilePane.getChildren().clear();
-        courseTreeView.getRoot().getChildren().clear();
-        CourseData.getInstance().getCourses().clear();
+//        allModules.clear();
+//        tilePane.getChildren().clear();
+//        courseTreeView.getRoot().getChildren().clear();
+//        CourseData.getInstance().getCourses().clear();
 
         List<Course> newModule = openAddModuleDialog();
-        if(!newModule.isEmpty()){
+        if (!newModule.isEmpty()){
+            System.out.println(newModule);
+            allModules.clear();
+            tilePane.getChildren().clear();
+            courseTreeView.getRoot().getChildren().clear();
+            CourseData.getInstance().getCourses().clear();
+
             CourseData.getInstance().setCourses(newModule);
             loadCoursesIntoPane();
+
         } else{
             System.out.println("List is empty");
         }
+
     }
 
 
@@ -596,6 +603,7 @@ public class Controller {
 
         Optional<ButtonType> result = dialog.showAndWait();
         if(result.isPresent() && result.get() == ButtonType.OK){
+            ectsTotal.setText("/" + Integer.toString(controller.getEctsTotal()));
             newCourses = controller.processResults();
             System.out.println("OK pressed");
 
@@ -637,6 +645,14 @@ public class Controller {
         if(file != null){
             CourseData.getInstance().writeToFile(file);
         }
+    }
+
+    private boolean backgroundIsDark(Course course){
+        Color color = course.getColor();
+        double L = 0.2126 * color.getRed() + 0.7152 * color.getGreen() + 0.0722 * color.getBlue();
+//        return (color.getRed()*0.299 + color.getGreen()*0.587 + color.getBlue()*0.114) < 0.186;
+        System.out.println(L);
+        return L < 0.4;
     }
 }
 

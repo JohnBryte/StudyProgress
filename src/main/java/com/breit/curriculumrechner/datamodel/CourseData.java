@@ -83,11 +83,14 @@ public class CourseData {
     public Map<String, List<Course>> getCourses() { return courses; }
 
     public boolean courseInModule(Course course){
-        for (Course c : courses.get(course.getModuleName())){
-            if (c.getCourseName().equals(course.getCourseName())){
-                return true;
+        if(courses.containsKey(course.getModuleName())){
+            for (Course c : courses.get(course.getModuleName())){
+                if (c.getCourseName().equals(course.getCourseName())){
+                    return true;
+                }
             }
         }
+
         return false;
     }
 

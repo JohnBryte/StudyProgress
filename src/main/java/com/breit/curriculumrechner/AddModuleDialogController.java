@@ -36,6 +36,8 @@ public class AddModuleDialogController {
     private TextField courseEctsField = new TextField();
     @FXML
     private Button addCourseButton;
+    @FXML
+    private ChoiceBox choiceBox;
 
     private ObservableList<Row> rows = FXCollections.observableArrayList();
     private List<List<TextField>> textFields = new ArrayList<>();
@@ -51,8 +53,20 @@ public class AddModuleDialogController {
     }
 
 
+    private int ectsTotal = 180;
+
 
     public void initialize() {
+        choiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
+                if (choiceBox.getItems().get((Integer) t1).equals("Bachelor")){
+                    ectsTotal = 180;
+                } else {
+                    ectsTotal = 120;
+                }
+            }
+        });
 
         rows.addListener((ListChangeListener<? super Row>) c -> {
             addCourseButton.disableProperty().unbind();
@@ -88,6 +102,10 @@ public class AddModuleDialogController {
         }
 //        CourseData.getInstance().setCourses(courses);
         return courses;
+    }
+
+    public int getEctsTotal(){
+        return ectsTotal;
     }
 
     @FXML

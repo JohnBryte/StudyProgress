@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
+<?import javafx.collections.FXCollections?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import java.lang.String?>
 <DialogPane
             fx:id="dialogPane"
             xmlns="http://javafx.com/javafx"
@@ -23,7 +22,14 @@
                 <Label text="Module color" />
                 <ColorPicker fx:id="colorPickerField"/>
                 <Button fx:id="addCourseButton" text="add course" onAction="#click"/>
-<!--                <Button fx:id="addCourseButton" text="add Course" onAction="#addCourseHBox"/>-->
+                <ChoiceBox fx:id="choiceBox" value="Bachelor">
+                    <items>
+                        <FXCollections fx:factory="observableArrayList">
+                            <String fx:value="Bachelor" />
+                            <String fx:value="Master" />
+                        </FXCollections>
+                    </items>
+                </ChoiceBox>
             </HBox>
 
 <!--            <HBox spacing="10">-->
