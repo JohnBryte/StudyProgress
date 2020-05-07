@@ -22,8 +22,10 @@
             <TextField fx:id="courseNameField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
             <Label text="ECTS:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
             <TextField fx:id="ectsField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-            <Label text="Color" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-            <ColorPicker fx:id="colorPickerField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+            <Label text="Semester:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+            <TextField fx:id="semesterField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+            <Label text="Color" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+            <ColorPicker fx:id="colorPickerField" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
         </GridPane>
     </content>
 

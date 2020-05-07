@@ -18,6 +18,8 @@ public class AddCourseDialogController {
     @FXML
     private TextField ectsField;
     @FXML
+    private TextField semesterField;
+    @FXML
     private ColorPicker colorPickerField;
     private boolean editing = false;
     private BooleanBinding inputsFull;
@@ -30,6 +32,7 @@ public class AddCourseDialogController {
         moduleNameField.setText(course.getModuleName());
         courseNameField.setText(course.getCourseName());
         ectsField.setText(Integer.toString(course.getEcts()));
+        semesterField.setText(Integer.toString(course.getSemester()));
         colorPickerField.setValue(course.getColor());
         editing = true;
     }
@@ -52,15 +55,29 @@ public class AddCourseDialogController {
             }
         });
 
+        semesterField.textProperty().addListener((observableValue, oldValue, newValue) -> {
+            try{
+                if(newValue.isEmpty()){
+                    semesterField.setText("");
+                } else {
+                    Integer.parseInt(newValue);
+                }
+
+            } catch (NumberFormatException e){
+                semesterField.setText(oldValue);
+            }
+        });
+
         inputsFull = new BooleanBinding() {
             {
-                bind(moduleNameField.textProperty(), courseNameField.textProperty(), ectsField.textProperty());
+                bind(moduleNameField.textProperty(), courseNameField.textProperty(), ectsField.textProperty(), semesterField.textProperty());
             }
             @Override
             protected boolean computeValue() {
                 return  moduleNameField.getText().trim().isEmpty() ||
                         courseNameField.getText().trim().isEmpty() ||
-                        ectsField.getText().isEmpty();
+                        ectsField.getText().isEmpty() ||
+                        semesterField.getText().isEmpty();
             }
         };
     }
@@ -69,9 +86,10 @@ public class AddCourseDialogController {
         String moduleName = moduleNameField.getText().trim();
         String courseName = courseNameField.getText().trim();
         int ects = Integer.parseInt(ectsField.getText().trim());
+        int semester = Integer.parseInt(semesterField.getText().trim());
         Color color = colorPickerField.getValue();
 
-        Course newCourse = new Course(moduleName, courseName, ects, color);
+        Course newCourse = new Course(moduleName, courseName, ects, semester, color);
 //        CourseData.getInstance().addTodoItem(newItem);
         return newCourse;
     }

@@ -43,6 +43,7 @@ public class CourseData {
                 String moduleName = "";
                 String courseName = "";
                 int ects = 0;
+                int semester = 0;
                 Color color = Color.WHITE;
                 Iterator<Cell> cellIterator = row.cellIterator();   //iterating over each column
                 while (cellIterator.hasNext()) {
@@ -57,12 +58,15 @@ public class CourseData {
                         case "ECTS":
                             ects = (int) cell.getNumericCellValue();
                             break;
+                        case "Semester":
+                            semester = (int) cell.getNumericCellValue();
+                            break;
                         case "Color":
                             color = Color.web(cell.getStringCellValue().trim());
                             break;
                     }
                 }
-                Course course = new Course(moduleName, courseName, ects, color);
+                Course course = new Course(moduleName, courseName, ects, semester, color);
 
                 if(courses.containsKey(course.getModuleName())){
                     List<Course> temp = courses.get(moduleName);
@@ -136,6 +140,9 @@ public class CourseData {
         cell.setCellValue(course.getEcts());
 
         cell = row.createCell(3);
+        cell.setCellValue(course.getSemester());
+
+        cell = row.createCell(4);
         cell.setCellValue(course.getColor().toString());
     }
 
@@ -150,6 +157,9 @@ public class CourseData {
         cell.setCellValue("ECTS");
 
         cell = row.createCell(3);
+        cell.setCellValue("Semester");
+
+        cell = row.createCell(4);
         cell.setCellValue("Color");
     }
 

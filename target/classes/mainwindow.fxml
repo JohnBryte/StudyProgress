@@ -33,7 +33,7 @@
             <HBox style="-fx-background-color: white">
                 <Label text="Total Ects: "/>
                 <Label fx:id="ectsCounter"/>
-                <Label text="/180"/>
+                <Label fx:id="ectsTotal" />
             </HBox>
         </VBox>
     </right>
