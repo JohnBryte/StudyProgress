@@ -333,12 +333,8 @@ public class Controller {
         stackPane.setId("stackPane" + course.getModuleName() + course.getCourseName());
         Text text = new Text(course.getCourseName() + "\n" + course.getEcts() + " Ects");
         if(backgroundIsDark(course)){
-            System.out.println("YES IS DARK");
             text.setFill(Color.WHITE);
-//            text.setStroke(Color.BLACK);
-//            text.setStrokeWidth(0.01);
         } else {
-            System.out.println("YES IS LIGHT");
             text.setFill(Color.BLACK);
         }
         text.setTextAlignment(TextAlignment.CENTER);
@@ -521,8 +517,6 @@ public class Controller {
                 }
                 //if not editing
                 //es fehlt noch ein else if wenn editing aber nicht derselbe moduleName
-
-                System.out.println("Farbe:" + newCourse.getColor());
 
                 if(CourseData.getInstance().courseInModule(newCourse)){
                     System.out.println("OOPS COURSE ALREADY IN MODULE");
