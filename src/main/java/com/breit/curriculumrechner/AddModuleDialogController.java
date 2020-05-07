@@ -71,7 +71,7 @@ public class AddModuleDialogController {
         rows.addListener((ListChangeListener<? super Row>) c -> {
             addCourseButton.disableProperty().unbind();
             BooleanExpression allEmpty = rows.stream()
-                    .map(r -> BooleanExpression.booleanExpression(r.nameAndEctsProperty()))
+                    .map(r -> BooleanExpression.booleanExpression(r.allFieldsFilledProperty()))
                     .reduce(new SimpleBooleanProperty(false), BooleanExpression::or);
             addCourseButton.disableProperty().bind(allEmpty.or(moduleNameField.textProperty().isEmpty()));
         });
@@ -97,7 +97,7 @@ public class AddModuleDialogController {
         Color color = colorPickerField.getValue();
         List<Course> courses = new ArrayList<>();
         for(Row row : rows){
-            Course course = new Course(moduleName, row.getName(), Integer.parseInt(row.getEcts()), color);
+            Course course = new Course(moduleName, row.getName(), Integer.parseInt(row.getEcts()), Integer.parseInt(row.getSemester()), color);
             courses.add(course);
         }
 //        CourseData.getInstance().setCourses(courses);
@@ -123,6 +123,8 @@ public class AddModuleDialogController {
         TextField newNameField = new TextField();
         Label ectsLabel = new Label("Ects: ");
         TextField newEctsField = new TextField();
+        Label semesterLabel = new Label("Semester: ");
+        TextField newSemesterField = new TextField();
         Button newAddCourseButton = new Button("add Course");
         Button newDeleteCourseButton = new Button("delete Course");
 
@@ -142,9 +144,26 @@ public class AddModuleDialogController {
             }
         });
 
+        newSemesterField.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
+                try{
+                    if(newValue.isEmpty()){
+                        newSemesterField.setText("");
+                    } else {
+                        Integer.parseInt(newValue);
+                    }
+
+                } catch (NumberFormatException e){
+                    newSemesterField.setText(oldValue);
+                }
+            }
+        });
+
         List<TextField> temp = new ArrayList<TextField>();
         temp.add(newNameField);
         temp.add(newEctsField);
+        temp.add(newSemesterField);
 
         textFields.add(temp);
         buttons.add(newAddCourseButton);
@@ -152,32 +171,17 @@ public class AddModuleDialogController {
         Row row = new Row();
         row.nameProperty().bind(newNameField.textProperty());
         row.ectsProperty().bind(newEctsField.textProperty());
-//        row.nameAndEctsProperty().bind(newNameField.textProperty().isEmpty().or(newEctsField.textProperty().isEmpty()));
-        row.nameAndEctsProperty().bind(Bindings.createBooleanBinding(()->
-                newNameField.getText().trim().isEmpty() || newEctsField.getText().trim().isEmpty(), newNameField.textProperty(), newEctsField.textProperty()));
+        row.semesterProperty().bind(newSemesterField.textProperty());
+
+        row.allFieldsFilledProperty().bind(Bindings.createBooleanBinding(()->
+                newNameField.getText().trim().isEmpty() || newEctsField.getText().trim().isEmpty() || newSemesterField.getText().trim().isEmpty(),
+                newNameField.textProperty(), newEctsField.textProperty(), newSemesterField.textProperty()));
 
         row.lastElementProperty().bind(Bindings.size(rows));
 
         rows.add(row);
-//        newAddCourseButton.disableProperty().bind(
-//                Bindings.isEmpty(row.nameProperty())
-//            .or(Bindings.isEmpty(row.ectsProperty()))
-//            .or(Bindings.isEmpty(moduleNameField.textProperty()))
-//        );
 
-//        newAddCourseButton.setOnAction(new EventHandler<ActionEvent>() {
-//            @Override
-//            public void handle(ActionEvent actionEvent) {
-////                newAddCourseButton.disableProperty().unbind();
-//                addCourseHBox();
-//                newNameField.setDisable(true);
-//                newEctsField.setDisable(true);
-////                newAddCourseButton.setDisable(true);
-//            }
-//        });
-
-
-        box.getChildren().addAll(nameLabel, newNameField, ectsLabel, newEctsField, newDeleteCourseButton);
+        box.getChildren().addAll(nameLabel, newNameField, ectsLabel, newEctsField, semesterLabel, newSemesterField, newDeleteCourseButton);
         root.getChildren().addAll(box);
 
         newDeleteCourseButton.disableProperty().bind(

@@ -3,7 +3,6 @@ package com.breit.curriculumrechner;
 import com.breit.curriculumrechner.datamodel.Course;
 import com.breit.curriculumrechner.datamodel.CourseData;
 import javafx.beans.binding.Bindings;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -81,8 +80,11 @@ public class Controller {
 
         CheckBoxTreeItem<Object> root = (CheckBoxTreeItem<Object>) courseTreeView.getRoot();
 
-        for(TreeItem<Object> module : root.getChildren()){
-            drawCourse(module);
+        for(List<Course> courseList : CourseData.getInstance().getCourses().values()){
+            for (Course course : courseList){
+                System.out.println(course);
+                drawCourse(course);
+            }
         }
 //        drawAllCourses(root);
 
@@ -233,17 +235,14 @@ public class Controller {
     }
 
     private void edit(TilePane modulePane, StackPane coursePane, Course oldCourse, Course newCourse){
-
-//        int i = CourseData.getInstance().getCourses().get(oldCourse.getModuleName()).indexOf(oldCourse);
+        int replacementIdx = CourseData.getInstance().getCourses().get(oldCourse.getModuleName()).indexOf(oldCourse);
         CourseData.getInstance().getCourses().get(oldCourse.getModuleName()).remove(oldCourse);
-        CourseData.getInstance().getCourses().get(newCourse.getModuleName()).add(newCourse);
+        CourseData.getInstance().getCourses().get(newCourse.getModuleName()).add(replacementIdx, newCourse);
 
         coursePane.getChildren().clear();
         Rectangle rect = drawRectangle(newCourse);
         createDescription(coursePane, newCourse, rect);
         drawCross(coursePane, newCourse, rect);
-
-//        addCourseToCheckBoxTree(newCourse);
 
         String module = newCourse.getModuleName();
         CheckBoxTreeItem<Object> currentCourse = createCheckBoxCourse(newCourse);
@@ -268,14 +267,14 @@ public class Controller {
     }
 
     //Create pane for all courses with same module
-    private void drawCourse(TreeItem<Object> module) {
+    private void drawCourse(Course currentCourse) {
 
-        if(allModules.contains(module.getValue().toString())){
+        String module = currentCourse.getModuleName();
+
+        if(allModules.contains(module)){
             //module already exists
             //add latest added course to existing module
             StackPane coursePane = new StackPane();
-            ObservableList<TreeItem<Object>> moduleChildren = module.getChildren();
-            Course currentCourse = (Course) moduleChildren.get(moduleChildren.size()-1).getValue();
             // RECTANGLE of course
             Rectangle rect = drawRectangle(currentCourse);
             //description on coursePane rectangle
@@ -284,7 +283,7 @@ public class Controller {
             drawCross(coursePane, currentCourse, rect);
 
             for(Node moduleNode : tilePane.getChildren()){
-                if(moduleNode.getId().equals("moduleStack" + module.getValue().toString())){
+                if(moduleNode.getId().equals("moduleStack" + module)){
                     StackPane moduleStackPane = (StackPane) moduleNode;
 
 //                    System.out.println(moduleStackPane.getChildren());
@@ -298,7 +297,7 @@ public class Controller {
         } else {
             TilePane modulePane = new TilePane();
 
-            modulePane.setId("modulePane" + module.getValue().toString().replaceAll("\\s",""));
+            modulePane.setId("modulePane" + module.replaceAll("\\s",""));
 
             modulePane.setHgap(4);
             modulePane.setVgap(4);
@@ -306,25 +305,21 @@ public class Controller {
             modulePane.setAlignment(Pos.CENTER);
             //Title for whole module
             StackPane moduleStack = new StackPane();
-//            StackPane moduleStack = setTitleOfModule(modulePane, module.getValue().toString());
             moduleStack.getChildren().add(modulePane);
-            setTitleOfModule(moduleStack, module.getValue().toString());
+            setTitleOfModule(moduleStack, module);
 
-            moduleStack.setId("moduleStack" + module.getValue().toString());
-            for(Course currentCourse : CourseData.getInstance().getCourses().get(module.getValue())){
-                StackPane coursePane = new StackPane();
-//                Course currentCourse = (Course) course.getValue();
-                // RECTANGLE of course
-                Rectangle rect = drawRectangle(currentCourse);
-                //description on coursePane rectangle
-                createDescription(coursePane, currentCourse, rect);
-                //draw cross on coursePane
-                drawCross(coursePane, currentCourse, rect);
+            moduleStack.setId("moduleStack" + module);
+            StackPane coursePane = new StackPane();
+            // RECTANGLE of course
+            Rectangle rect = drawRectangle(currentCourse);
+            //description on coursePane rectangle
+            createDescription(coursePane, currentCourse, rect);
+            //draw cross on coursePane
+            drawCross(coursePane, currentCourse, rect);
 
-                modulePane.getChildren().add(coursePane);
-                allModules.add(module.getValue().toString());
-                addOnMouseClick(modulePane, coursePane, currentCourse);
-            }
+            modulePane.getChildren().add(coursePane);
+            allModules.add(module);
+            addOnMouseClick(modulePane, coursePane, currentCourse);
             tilePane.getChildren().add(moduleStack);
         }
     }
@@ -333,12 +328,8 @@ public class Controller {
         stackPane.setId("stackPane" + course.getModuleName() + course.getCourseName());
         Text text = new Text(course.getCourseName() + "\n" + course.getEcts() + " Ects");
         if(backgroundIsDark(course)){
-            System.out.println("YES IS DARK");
             text.setFill(Color.WHITE);
-//            text.setStroke(Color.BLACK);
-//            text.setStrokeWidth(0.01);
         } else {
-            System.out.println("YES IS LIGHT");
             text.setFill(Color.BLACK);
         }
         text.setTextAlignment(TextAlignment.CENTER);
@@ -474,7 +465,7 @@ public class Controller {
 //            TreeItem<Object> treeItemCourse = new TreeItem<>(newCourse);
 //            module.getChildren().add(treeItemCourse);
 //        }
-        drawCourse(module);
+        drawCourse(course);
     }
 
     @FXML
@@ -512,8 +503,13 @@ public class Controller {
             Course newCourse = controller.processResults();
             if (course != null && newCourse.getModuleName().equals(course.getModuleName())){
                 //edit course
-                //same module different course name
+//                //same module different course name
+//                if (course.getSemester() == newCourse.getSemester()){
+//                    course.setSemester(newCourse.getSemester());
+//                } else{
                 edit(modulePane, coursePane, course, newCourse);
+//                }
+
             } else {
 
                 if(course != null){
@@ -521,8 +517,6 @@ public class Controller {
                 }
                 //if not editing
                 //es fehlt noch ein else if wenn editing aber nicht derselbe moduleName
-
-                System.out.println("Farbe:" + newCourse.getColor());
 
                 if(CourseData.getInstance().courseInModule(newCourse)){
                     System.out.println("OOPS COURSE ALREADY IN MODULE");
@@ -651,7 +645,6 @@ public class Controller {
         Color color = course.getColor();
         double L = 0.2126 * color.getRed() + 0.7152 * color.getGreen() + 0.0722 * color.getBlue();
 //        return (color.getRed()*0.299 + color.getGreen()*0.587 + color.getBlue()*0.114) < 0.186;
-        System.out.println(L);
         return L < 0.4;
     }
 }

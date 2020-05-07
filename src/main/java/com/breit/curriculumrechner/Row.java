@@ -25,10 +25,21 @@ public class Row {
         ectsProperty().set(ects);
     }
 
-    public final BooleanProperty nameAndEcts = new SimpleBooleanProperty();
-    public final BooleanProperty nameAndEctsProperty(){ return nameAndEcts; }
-    public final boolean getNameAndEcts() {
-        return nameAndEctsProperty().get();
+    public final StringProperty semester = new SimpleStringProperty();
+    public StringProperty semesterProperty() {
+        return semester ;
+    }
+    public final String getSemester() {
+        return semesterProperty().get();
+    }
+    public final void setSemester(String semester) {
+        semesterProperty().set(semester);
+    }
+
+    public final BooleanProperty allFieldsFilled = new SimpleBooleanProperty();
+    public final BooleanProperty allFieldsFilledProperty(){ return allFieldsFilled; }
+    public final boolean getAllFieldsFilled() {
+        return allFieldsFilledProperty().get();
     }
 
     public final IntegerProperty lastElement = new SimpleIntegerProperty();

@@ -6,17 +6,27 @@ public class Course {
     private String moduleName;
     private String courseName;
     private int ects;
+    private int semester;
     private Color color;
 
-    public Course(String moduleName, String courseName, int ects, Color color) {
+    public Course(String moduleName, String courseName, int ects, int semester, Color color) {
         this.moduleName = moduleName;
         this.courseName = courseName;
         this.ects = ects;
+        this.semester = semester;
         this.color = color;
     }
 
     public Color getColor() {
         return color;
+    }
+
+    public int getSemester() {
+        return semester;
+    }
+
+    public void setSemester(int semester) {
+        this.semester = semester;
     }
 
     public void setColor(Color color) {
