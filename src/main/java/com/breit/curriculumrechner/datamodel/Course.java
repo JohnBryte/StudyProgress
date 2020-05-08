@@ -57,6 +57,14 @@ public class Course {
         this.ects = ects;
     }
 
+    public String getOrdering(boolean moduleView){
+        if (moduleView){
+            return this.getModuleName();
+        } else {
+            return Integer.toString(this.getSemester());
+        }
+    }
+
     @Override
     public String toString() {
         return courseName;
