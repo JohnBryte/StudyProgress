@@ -49,13 +49,19 @@ public class Controller {
     private Menu editMenu;
     @FXML
     private Label ectsTotal;
+    @FXML
+    private CheckBox changeView;
 
+    private boolean moduleView = CourseData.getInstance().getModuleView();
     private final ContextMenu contextMenu = new ContextMenu();
     private Map<String, List<Pair<Course, StackPane>>> stackpaneMapByModules = new HashMap<>();
     private Map<String, List<Pair<Course, StackPane>>> stackpaneMapBySemesters = new HashMap<>();
 
 
     public void initialize(){
+
+        setChangeViewText();
+
         CheckBoxTreeItem<Object> root = new CheckBoxTreeItem<>("Root");
         courseTreeView.setRoot(root);
 
@@ -71,6 +77,14 @@ public class Controller {
 
         // set the cell factory
         courseTreeView.setCellFactory(CheckBoxTreeCell.forTreeView());
+    }
+
+    private void setChangeViewText() {
+        if (moduleView){
+            changeView.setText("Change to semester view");
+        } else {
+            changeView.setText("Change to module view");
+        }
     }
 
     private void loadCoursesIntoPane(){
@@ -180,31 +194,41 @@ public class Controller {
         });
     }
 
-    private void deleteCourse(TilePane modulePane, StackPane coursePane, Course course){
-        int idx = CourseData.getInstance().getCourses().get(course.getModuleName()).indexOf(course);
-        deleteCourseFromPane(modulePane, coursePane, course, idx);
-        deleteCourseFromCheckBoxTree(course.getModuleName(), idx);
+    private void deleteCourse(TilePane framePane, StackPane coursePane, Course course){
+        int idx = CourseData.getInstance().getCoursesByModules().get(course.getModuleName()).indexOf(course);
+//        int i = CourseData.getInstance().getCourses().get(course.getOrdering(moduleView)).indexOf(course);
+        deleteCourseFromPane(framePane, coursePane, course);
+        deleteCourseFromCheckBoxTree(course, idx);
 
-        if(moduleIsEmpty(modulePane)){
-            deleteModuleFromPane(modulePane, course.getModuleName());
+        if(moduleIsEmpty(framePane)){
+            deleteModuleFromPane(framePane, course);
         }
+//        if(semesterIsEmpty())
     }
 
     private boolean moduleIsEmpty(TilePane modulePane){
         return modulePane.getChildren().size() == 0;
     }
 
-    private void deleteCourseFromPane(TilePane modulePane, StackPane coursePane, Course course, int i){
-
+    private void deleteCourseFromPane(TilePane modulePane, StackPane coursePane, Course course){
         stackpaneMapByModules.get(course.getModuleName()).remove(new Pair<Course, StackPane>(course,coursePane));
-        System.out.println(CourseData.getInstance().getCourses().get(course.getModuleName()));
-        System.out.println("idx: " + i);
-        CourseData.getInstance().getCourses().get(course.getModuleName()).remove(course);
+        CourseData.getInstance().getCoursesByModules().get(course.getModuleName()).remove(course);
+
+        stackpaneMapBySemesters.get(Integer.toString(course.getSemester())).remove(new Pair<Course, StackPane>(course,coursePane));
+        int idx = CourseData.getInstance().getCoursesBySemester().get(Integer.toString(course.getSemester())).indexOf(course);
+        CourseData.getInstance().getCoursesBySemester().get(Integer.toString(course.getSemester())).remove(course); //früher remove(idx)
+
+//        if(CourseData.getInstance().getCoursesBySemester().get(Integer.toString(course.getSemester())).isEmpty()){
+//            System.out.println("DRIN");
+//            CourseData.getInstance().getCoursesBySemester().remove(Integer.toString(course.getSemester()));
+//        }
+
         coursePane.getChildren().clear();
-        modulePane.getChildren().remove(i);
+        modulePane.getChildren().remove(modulePane.getChildren().indexOf(coursePane));
     }
 
-    private void deleteCourseFromCheckBoxTree(String moduleName, int i){
+    private void deleteCourseFromCheckBoxTree(Course course, int i){
+        String moduleName = course.getModuleName();
         int moduleIdx = 0;
         boolean found = false;
         for(Object o : courseTreeView.getRoot().getChildren()){
@@ -218,14 +242,36 @@ public class Controller {
         if(found){
             CheckBoxTreeItem moduleInTree = (CheckBoxTreeItem) courseTreeView.getRoot().getChildren().get(moduleIdx);
             moduleInTree.getChildren().remove(i);
-
+            if (moduleInTree.getChildren().isEmpty()){
+                courseTreeView.getRoot().getChildren().remove(moduleIdx);
+            }
         }
     }
 
-    private void deleteModuleFromPane(TilePane modulePane, String moduleName){
+    private void deleteModuleFromPane(TilePane framePane, Course course){
         //Delete From Pane
-        Pane temp = (Pane) modulePane.getParent().getParent();
-        temp.getChildren().removeIf(o -> o.getId().equals("moduleStack" + moduleName));
+/*        String ordering = course.getOrdering(moduleView);
+        Pane moduleStack = (Pane) framePane.getParent().getParent();
+        moduleStack.getChildren().removeIf(o -> o.getId().equals("orderingStack" + ordering));
+        allModules.remove(course.getModuleName());
+        CourseData.getInstance().getCoursesByModules().remove(course.getModuleName());
+
+        String semester = Integer.toString(course.getSemester());
+        CourseData.getInstance().getCoursesBySemester().remove(semester);*/
+
+
+        if (moduleView){
+            String moduleName = course.getModuleName();
+            Pane moduleStack = (Pane) framePane.getParent().getParent();
+            moduleStack.getChildren().removeIf(o -> o.getId().equals("orderingStack" + moduleName));
+            allModules.remove(moduleName);
+            CourseData.getInstance().getCoursesByModules().remove(moduleName);
+        } else{
+            String semester = Integer.toString(course.getSemester());
+            Pane semesterStack = (Pane) framePane.getParent().getParent();
+            semesterStack.getChildren().removeIf(o -> o.getId().equals("orderingStack" + semester));
+            CourseData.getInstance().getCoursesBySemester().remove(semester);
+        }
 
         for(Object o : courseTreeView.getRoot().getChildren()){
             CheckBoxTreeItem bla = (CheckBoxTreeItem) o;
@@ -234,19 +280,55 @@ public class Controller {
                 break;
             }
         }
-        allModules.remove(moduleName);
-        CourseData.getInstance().getCourses().remove(moduleName);
     }
 
     private void edit(TilePane modulePane, StackPane coursePane, Course oldCourse, Course newCourse){
-        int replacementIdx = CourseData.getInstance().getCourses().get(oldCourse.getModuleName()).indexOf(oldCourse);
-        CourseData.getInstance().getCourses().get(oldCourse.getModuleName()).remove(oldCourse);
-        CourseData.getInstance().getCourses().get(newCourse.getModuleName()).add(replacementIdx, newCourse);
+        int i = CourseData.getInstance().getCourses().get(oldCourse.getOrdering(moduleView)).indexOf(oldCourse);
+/*        if (moduleView){
+            CourseData.getInstance().getCoursesByModules().get(oldCourse.getModuleName()).remove(oldCourse);
+            CourseData.getInstance().getCoursesByModules().get(newCourse.getModuleName()).add(i, newCourse);
+
+            int moduleIdx = stackpaneMapByModules.get(oldCourse.getModuleName()).indexOf(new Pair<Course, StackPane>(oldCourse, coursePane));
+            System.out.println("IDX: " + stackpaneMapByModules.get(oldCourse.getModuleName()).indexOf(new Pair<Course, StackPane>(oldCourse, coursePane)));
+            System.out.println(stackpaneMapByModules.get(oldCourse.getModuleName()));
+            stackpaneMapByModules.get(oldCourse.getModuleName()).remove(new Pair<Course, StackPane>(oldCourse, coursePane));
+            createCourseInPane(newCourse);
+//            stackpaneMapByModules.get(newCourse.getModuleName()).add(moduleIdx, new Pair<Course, StackPane>(newCourse, newCoursePane));
+
+        } else {
+            CourseData.getInstance().getCoursesBySemester().get(Integer.toString(newCourse.getSemester())).remove(oldCourse);
+            CourseData.getInstance().getCoursesBySemester().get(Integer.toString(newCourse.getSemester())).add(i, newCourse);
+
+            int semesterIdx = stackpaneMapBySemesters.get(Integer.toString(oldCourse.getSemester())).indexOf(new Pair<Course, StackPane>(oldCourse, coursePane));
+            stackpaneMapBySemesters.get(Integer.toString(oldCourse.getSemester())).remove(new Pair<Course, StackPane>(oldCourse, coursePane));
+            StackPane newCoursePane = createCoursePane(newCourse);
+            stackpaneMapBySemesters.get(Integer.toString(newCourse.getSemester())).add(semesterIdx, new Pair<Course, StackPane>(newCourse, newCoursePane));
+        }*/
+
+        System.out.println(CourseData.getInstance().getCourses().get(newCourse.getOrdering(moduleView)));
+//        CourseData.getInstance().getCourses().get(newCourse.getOrdering(moduleView)).indexOf(new Pair<Course, StackPane>(oldCourse, coursePane));
+        CourseData.getInstance().getCourses().get(oldCourse.getOrdering(moduleView)).remove(oldCourse);
+        CourseData.getInstance().getCourses().get(newCourse.getOrdering(moduleView)).add(i, newCourse);
+
+        int semesterIdx = stackpaneMapBySemesters.get(Integer.toString(oldCourse.getSemester())).indexOf(new Pair<Course, StackPane>(oldCourse, coursePane));
+        stackpaneMapBySemesters.get(Integer.toString(oldCourse.getSemester())).remove(new Pair<Course, StackPane>(oldCourse, coursePane));
+        int moduleIdx = stackpaneMapByModules.get(oldCourse.getModuleName()).indexOf(new Pair<Course, StackPane>(oldCourse, coursePane));
+        stackpaneMapByModules.get(oldCourse.getModuleName()).remove(new Pair<Course, StackPane>(oldCourse, coursePane));
+//        TilePane bla = (TilePane) coursePane.getParent();
+//        System.out.println(bla.getChildren().remove(coursePane));
+//        coursePane = createCoursePane(newCourse);
 
         coursePane.getChildren().clear();
         Rectangle rect = drawRectangle(newCourse);
         createDescription(coursePane, newCourse, rect);
         drawCross(coursePane, newCourse, rect);
+
+        putIntoStackPaneMaps(newCourse, coursePane);
+
+//        coursePane.getChildren().clear();
+//        Rectangle rect = drawRectangle(newCourse);
+//        createDescription(coursePane, newCourse, rect);
+//        drawCross(coursePane, newCourse, rect);
 
         String module = newCourse.getModuleName();
         CheckBoxTreeItem<Object> currentCourse = createCheckBoxCourse(newCourse);
@@ -266,30 +348,52 @@ public class Controller {
                 }
             }
         }
-
         addOnMouseClick(modulePane, coursePane, newCourse);
     }
 
     private void createCourseInPane(Course course){
         StackPane coursePane = createCoursePane(course);
-        StackPane moduleStack = null;// = new StackPane();
-        if(!allModules.contains(course.getModuleName())){
-            moduleStack = createStackPane(course);
+        StackPane orderingStack = null;// = new StackPane();
+        if(!allModules.contains(course.getOrdering(moduleView))){
+            orderingStack = createStackPane(course);
         }
 
-        for (Pair<Course, StackPane> pair : stackpaneMapByModules.get(course.getModuleName())){
-            if (pair.getKey().equals(course)){
-                TilePane framePane = createFramePane(course, pair.getValue());  //framePane
 
-                if(allModules.contains(course.getModuleName()) && moduleStack != null){
-                    moduleStack.getChildren().add(framePane);
-                    setTitleOfModule(moduleStack, course.getModuleName());
+        Map<String, List<Pair<Course, StackPane>>> stackPanes;
+        if (moduleView){
+            stackPanes = stackpaneMapByModules;
+        } else {
+            stackPanes = stackpaneMapBySemesters;
+        }
+
+        for (Pair<Course, StackPane> pair : stackPanes.get(course.getOrdering(moduleView))) {
+            if (pair.getKey().equals(course)) {
+                TilePane framePane = createFramePane(course);  //framePane
+
+                if (allModules.contains(course.getOrdering(moduleView)) && orderingStack != null) {
+                    orderingStack.getChildren().add(framePane);
+                    setTitleOfModule(orderingStack, course.getOrdering(moduleView));
                 }
 
-                framePane.getChildren().add(coursePane);
+                framePane.getChildren().add(pair.getValue());
                 addOnMouseClick(framePane, coursePane, course);
             }
         }
+//        for (Pair<Course, StackPane> pair : stackpaneMapBySemesters.get(course.getOrdering(moduleView))){
+//            if (pair.getKey().equals(course)){
+//                TilePane framePane = createFramePane(course);  //framePane
+//
+//                if(allModules.contains(course.getOrdering(moduleView)) && moduleStack != null){
+//                    moduleStack.getChildren().add(framePane);
+//                    setTitleOfModule(moduleStack, course.getModuleName());
+//                }
+//
+//                framePane.getChildren().add(pair.getValue());
+//                addOnMouseClick(framePane, coursePane, course);
+//            }
+//        }
+
+
 //        TilePane framePane = createFramePane(course, coursePane);  //framePane
 //
 //        if(allModules.contains(course.getModuleName()) && moduleStack != null){
@@ -375,7 +479,7 @@ public class Controller {
     }
 
     private void createDescription(StackPane stackPane, Course course, Rectangle rect) {
-        stackPane.setId("stackPane" + course.getModuleName() + course.getCourseName());
+        stackPane.setId("coursePane" + course.getModuleName() + course.getCourseName());
         Text text = new Text(course.getCourseName() + "\n" + course.getEcts() + " Ects");
         if(backgroundIsDark(course)){
             text.setFill(Color.WHITE);
@@ -400,10 +504,13 @@ public class Controller {
         return rectangle;
     }
 
-    private void setTitleOfModule(StackPane stack, String moduleName) {
+    private void setTitleOfModule(StackPane stack, String ordering) {
 //        StackPane stack = new StackPane();
 
-        Text text = new Text(moduleName);
+        Text text = new Text(ordering);
+        if (!moduleView){
+            text.setText(text.getText() + " Semester");
+        }
         text.setOpacity(0.5);
         text.setTextAlignment(TextAlignment.CENTER);
         text.setFont(Font.font("Arial", FontWeight.BOLD, 22));
@@ -471,9 +578,16 @@ public class Controller {
 
     private void tickOffCourse(CheckBoxTreeItem<Object> currentCourse){
         Course course = (Course) currentCourse.getValue();
+
+        Map<String, List<Pair<Course, StackPane>>> stackPanes;
+        if (moduleView){
+            stackPanes = stackpaneMapByModules;
+        } else {
+            stackPanes = stackpaneMapBySemesters;
+        }
         if(currentCourse.isSelected()){
             ectsEarned += course.getEcts();
-            for (Pair<Course, StackPane> pair : stackpaneMapByModules.get(course.getModuleName())){
+            for (Pair<Course, StackPane> pair : stackPanes.get(course.getOrdering(moduleView))){
                 if(course.equals(pair.getKey())){
                     int sz =  pair.getValue().getChildren().size();
                     pair.getValue().getChildren().get(sz-1).setOpacity(1);
@@ -483,7 +597,7 @@ public class Controller {
         } else {
             ectsEarned -= course.getEcts();
 
-            for (Pair<Course, StackPane> pair : stackpaneMapByModules.get(course.getModuleName())){
+            for (Pair<Course, StackPane> pair : stackPanes.get(course.getOrdering(moduleView))){
                 if(course.equals(pair.getKey())){
                     int sz =  pair.getValue().getChildren().size();
                     pair.getValue().getChildren().get(sz-1).setOpacity(-1);
@@ -569,36 +683,22 @@ public class Controller {
         Optional<ButtonType> result = dialog.showAndWait();
         if(result.isPresent() && result.get() == ButtonType.OK){
             Course newCourse = controller.processResults();
-            if (course != null && newCourse.getModuleName().equals(course.getModuleName())){
+            if (course != null && newCourse.getOrdering(moduleView).equals(course.getOrdering(moduleView))){
                 //edit course
-//                //same module different course name
-//                if (course.getSemester() == newCourse.getSemester()){
-//                    course.setSemester(newCourse.getSemester());
-//                } else{
+                //same module different course name
                 edit(modulePane, coursePane, course, newCourse);
-//                }
 
             } else {
-
                 if(course != null){
                     deleteCourse(modulePane, coursePane, course);
                 }
                 //if not editing
                 //es fehlt noch ein else if wenn editing aber nicht derselbe moduleName
-
                 if(CourseData.getInstance().courseInModule(newCourse)){
                     System.out.println("OOPS COURSE ALREADY IN MODULE");
                 } else {
                     createCourseInPane(newCourse);
-//                    StackPane newCoursePane = createCoursePane(newCourse);
-//                    TilePane framePane = createFramePane(newCourse, newCoursePane);
-//                    StackPane moduleStack = createStackPane(newCourse);
-//                    moduleStack.getChildren().add(framePane);
-//
-//                    addOnMouseClick(framePane, coursePane, newCourse);
                     addCourseInTree(newCourse);
-//                    framePane.getChildren().add(newCoursePane);
-//                    tilePane.getChildren().add(moduleStack);
                 }
 
 
@@ -610,14 +710,14 @@ public class Controller {
         }
     }
 
-    private TilePane createFramePane(Course course, StackPane coursePane){
-        String module = course.getModuleName();
-        if(allModules.contains(module)){
+    private TilePane createFramePane(Course course){
+        String courseOrdering = course.getOrdering(moduleView);
+        if(allModules.contains(courseOrdering)){
             for(Node moduleNode : tilePane.getChildren()){
-                if(moduleNode.getId().equals("moduleStack" + module)){
+                if(moduleNode.getId().equals("orderingStack" + courseOrdering)){
                     StackPane moduleStackPane = (StackPane) moduleNode;
                     int sz =  moduleStackPane.getChildren().size();
-                    System.out.println(moduleStackPane.getChildren());
+//                    System.out.println(moduleStackPane.getChildren());
                     TilePane modulePane = (TilePane) moduleStackPane.getChildren().get(0);
 //                    if(stackpaneMapByModules.containsKey(module)){
 //                        stackpaneMapByModules.get(module).add(new Pair<Course, StackPane>(course, coursePane));
@@ -631,12 +731,17 @@ public class Controller {
             }
         } else {
             TilePane modulePane = new TilePane();
-            modulePane.setId("modulePane" + module.replaceAll("\\s",""));
+            modulePane.setId("modulePane" + courseOrdering.replaceAll("\\s",""));
             modulePane.setHgap(4);
             modulePane.setVgap(4);
-            modulePane.setPrefColumns(2);
+            if (moduleView){
+                modulePane.setPrefColumns(2);
+            } else {
+                modulePane.setPrefColumns(6);
+            }
             modulePane.setAlignment(Pos.CENTER);
-            allModules.add(module);
+            allModules.add(courseOrdering);
+
 
 //            if(stackpaneMapByModules.containsKey(module)){
 ////                        List<StackPane> tmp = blubb.get(module);
@@ -653,12 +758,12 @@ public class Controller {
     }
 
     private StackPane createStackPane(Course course){
-        String module = course.getModuleName();
-        StackPane moduleStack = new StackPane();
+        String orderingBy = course.getOrdering(moduleView);
+        StackPane orderingStack = new StackPane();
 //        setTitleOfModule(moduleStack, module);
-        moduleStack.setId("moduleStack" + module);
-        tilePane.getChildren().add(moduleStack);
-        return moduleStack;
+        orderingStack.setId("orderingStack" + orderingBy);
+        tilePane.getChildren().add(orderingStack);
+        return orderingStack;
     }
 
     @FXML
@@ -748,9 +853,12 @@ public class Controller {
         File file = chooser.showOpenDialog(new Stage());
         CourseData cd = CourseData.getInstance();
         if(cd.getCourses() != null){
-            cd.getCourses().clear();
+            cd.getCoursesBySemester().clear();
+            cd.getCoursesByModules().clear();
             allModules.clear();
             tilePane.getChildren().clear();
+            stackpaneMapBySemesters.clear();
+            stackpaneMapByModules.clear();
             courseTreeView.getRoot().getChildren().clear();
         }
 
@@ -784,15 +892,54 @@ public class Controller {
     @FXML
     private void changeView(){
         CourseData.getInstance().changeView();
+        moduleView = !moduleView;
+        setChangeViewText();
         System.out.println("!!!!!!!!! Changed view !!!!!!!!!!!");
 //        System.out.println(CourseData.getInstance().getCourses());
+        System.out.println("ByModules: " + CourseData.getInstance().getCoursesByModules());
+        System.out.println("BySemester: " + CourseData.getInstance().getCoursesBySemester());
+        System.out.println();
         buildView();
     }
 
 
     private void buildView(){
         boolean isModuleView = CourseData.getInstance().getModuleView();
+        tilePane.getChildren().clear();
+        allModules.clear();
+//        stackpaneMapBySemesters.clear();
+//        stackpaneMapByModules.clear();
 
+
+        Map<String, List<Pair<Course, StackPane>>> temp = new HashMap();
+        if (moduleView){
+            temp = stackpaneMapByModules;
+        } else {
+            temp = stackpaneMapBySemesters;
+        }
+
+        for (String ordering : temp.keySet()){
+            for (Pair<Course, StackPane> p : temp.get(ordering)){
+
+                Course course = p.getKey();
+                StackPane coursePane = p.getValue();
+
+                StackPane moduleStack = null;// = new StackPane();
+                if(!allModules.contains(course.getOrdering(moduleView))){
+                    moduleStack = createStackPane(course);
+                }
+
+                TilePane framePane = createFramePane(course);  //framePane
+
+                if (allModules.contains(course.getOrdering(moduleView)) && moduleStack != null) {
+                    moduleStack.getChildren().add(framePane);
+                    setTitleOfModule(moduleStack, course.getOrdering(moduleView));
+                }
+
+                framePane.getChildren().add(coursePane);
+                addOnMouseClick(framePane, coursePane, course);
+            }
+        }
     }
 }
 

@@ -69,7 +69,7 @@ public class CourseData {
                     }
                 }
                 Course course = new Course(moduleName, courseName, ects, semester, color);
-
+                System.out.println(course);
                 //fill by modules
                 if(coursesByModules.containsKey(course.getModuleName())){
                     List<Course> temp = coursesByModules.get(moduleName);
@@ -96,6 +96,9 @@ public class CourseData {
         catch(Exception e) {
             e.printStackTrace();
         }
+
+        System.out.println(this.getCoursesByModules());
+        System.out.println(this.getCoursesBySemester());
     }
 
     public Map<String, List<Course>> getCoursesByModules(){

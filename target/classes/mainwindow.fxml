@@ -27,9 +27,9 @@
         </MenuBar>
     </top>
     <right>
-        <VBox style="-fx-background-color: white" >
+        <VBox style="-fx-background-color: white">
             <HBox>
-                <CheckBox onAction="#changeView" text="Semester view"/>
+                <CheckBox fx:id="changeView" onAction="#changeView"/>
             </HBox>
             <TreeView fx:id="courseTreeView" showRoot="false">
             </TreeView>
