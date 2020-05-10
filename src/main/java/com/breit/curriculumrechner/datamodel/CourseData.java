@@ -15,7 +15,9 @@ import java.util.Map;
 
 public class CourseData {
     private static CourseData instance = new CourseData();
-    private Map<String, List<Course>> courses = FXCollections.observableHashMap();
+    private Map<String, List<Course>> coursesByModules = FXCollections.observableHashMap();
+    private Map<String, List<Course>> coursesBySemester = FXCollections.observableHashMap();
+    private boolean moduleView = true;
 //    private static String filename = "MyCourses.txt";
 
     public static CourseData getInstance(){
@@ -67,41 +69,110 @@ public class CourseData {
                     }
                 }
                 Course course = new Course(moduleName, courseName, ects, semester, color);
-
-                if(courses.containsKey(course.getModuleName())){
-                    List<Course> temp = courses.get(moduleName);
+                System.out.println(course);
+                //fill by modules
+                if(coursesByModules.containsKey(course.getModuleName())){
+                    List<Course> temp = coursesByModules.get(moduleName);
                     temp.add(course);
-                    courses.put(moduleName, temp);
+                    coursesByModules.put(moduleName, temp);
                 } else {
                     List<Course> temp = new ArrayList<>();
                     temp.add(course);
-                    courses.putIfAbsent(moduleName, temp);
+                    coursesByModules.putIfAbsent(moduleName, temp);
+                }
+
+                //fill by semester
+                if(coursesBySemester.containsKey(Integer.toString(course.getSemester()))){
+                    List<Course> temp = coursesBySemester.get(Integer.toString(semester));
+                    temp.add(course);
+                    coursesBySemester.put(Integer.toString(semester), temp);
+                } else {
+                    List<Course> temp = new ArrayList<>();
+                    temp.add(course);
+                    coursesBySemester.putIfAbsent(Integer.toString(semester), temp);
                 }
             }
         }
         catch(Exception e) {
             e.printStackTrace();
         }
+
+        System.out.println(this.getCoursesByModules());
+        System.out.println(this.getCoursesBySemester());
     }
 
-    public Map<String, List<Course>> getCourses() { return courses; }
+    public Map<String, List<Course>> getCoursesByModules(){
+        return coursesByModules;
+    }
+    public Map<String, List<Course>> getCoursesBySemester(){
+        return coursesBySemester;
+    }
+
+    public Map<String, List<Course>> getCourses() {
+        if (moduleView){
+            return coursesByModules;
+        } else {
+            return coursesBySemester;
+        }
+    }
 
     public boolean courseInModule(Course course){
-        if(courses.containsKey(course.getModuleName())){
-            for (Course c : courses.get(course.getModuleName())){
+        if(coursesByModules.containsKey(course.getModuleName())){
+            for (Course c : coursesByModules.get(course.getModuleName())){
                 if (c.getCourseName().equals(course.getCourseName())){
                     return true;
                 }
             }
         }
-
         return false;
     }
 
-    public void setCourses(List<Course> list){
-        String moduleName = list.get(0).getModuleName();
-        courses.putIfAbsent(moduleName, list);
-        System.out.println(courses);
+    public boolean courseInSemester(Course course){
+        if(coursesBySemester.containsKey(Integer.toString(course.getSemester()))){
+            for (Course c : coursesBySemester.get(Integer.toString(course.getSemester()))){
+                if (c.getCourseName().equals(course.getCourseName())){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public void setCourse(Course course){
+
+        //module view
+        String moduleName = course.getModuleName();
+        if(coursesByModules.containsKey(moduleName)){
+            coursesByModules.get(moduleName).add(course);
+        } else {
+            List<Course> temp = new ArrayList<>();
+            temp.add(course);
+            coursesByModules.putIfAbsent(moduleName, temp);
+        }
+//        coursesByModules.putIfAbsent(course.getModuleName());
+        System.out.println(coursesByModules);
+
+        //semester view
+        String semester = Integer.toString(course.getSemester());
+        if(coursesBySemester.containsKey(semester)){
+            coursesBySemester.get(semester).add(course);
+        } else {
+            List<Course> temp = new ArrayList<>();
+            temp.add(course);
+            coursesBySemester.putIfAbsent(semester, temp);
+        }
+    }
+
+    public boolean getModuleView(){
+        return moduleView;
+    }
+
+    public void changeView(){
+        if (moduleView){
+            moduleView = false;
+        } else {
+            moduleView = true;
+        }
     }
 
     public void writeToFile(File file){
@@ -113,8 +184,8 @@ public class CourseData {
         Row titles = sheet.createRow(rowCount);
         writeTitles(titles);
 
-        for(String moduleName : courses.keySet()){
-            for(Course course : courses.get(moduleName)){
+        for(String moduleName : coursesByModules.keySet()){
+            for(Course course : coursesByModules.get(moduleName)){
                 rowCount++;
                 Row row = sheet.createRow(rowCount);
                 writeCourse(course, row);
