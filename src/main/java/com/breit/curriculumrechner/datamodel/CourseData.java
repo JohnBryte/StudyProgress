@@ -8,15 +8,14 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CourseData {
     private static CourseData instance = new CourseData();
-    private Map<String, List<Course>> coursesByModules = FXCollections.observableHashMap();
-    private Map<String, List<Course>> coursesBySemester = FXCollections.observableHashMap();
+    private Map<String, List<Course>> linkedMapModules = new LinkedHashMap<>();
+    private Map<String, List<Course>> linkedMapSemester = new LinkedHashMap<>();
+    private Map<String, List<Course>> coursesByModules = FXCollections.observableMap(linkedMapModules);
+    private Map<String, List<Course>> coursesBySemester = FXCollections.observableMap(linkedMapSemester);
     private boolean moduleView = true;
 //    private static String filename = "MyCourses.txt";
 

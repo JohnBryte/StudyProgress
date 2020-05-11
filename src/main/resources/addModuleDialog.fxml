@@ -27,9 +27,11 @@
                         <FXCollections fx:factory="observableArrayList">
                             <String fx:value="Bachelor" />
                             <String fx:value="Master" />
+                            <String fx:value="individual"/>
                         </FXCollections>
                     </items>
                 </ChoiceBox>
+                <Spinner fx:id="spinner" opacity="-Infinity" disable="true"/>
             </HBox>
 
 <!--            <HBox spacing="10">-->

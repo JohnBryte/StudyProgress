@@ -14,6 +14,8 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -38,6 +40,8 @@ public class AddModuleDialogController {
     private Button addCourseButton;
     @FXML
     private ChoiceBox choiceBox;
+    @FXML
+    private Spinner<Integer> spinner = new Spinner<Integer>();
 
     private ObservableList<Row> rows = FXCollections.observableArrayList();
     private List<List<TextField>> textFields = new ArrayList<>();
@@ -62,8 +66,33 @@ public class AddModuleDialogController {
             public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
                 if (choiceBox.getItems().get((Integer) t1).equals("Bachelor")){
                     ectsTotal = 180;
-                } else {
+                    spinner.setOpacity(-1);
+                    spinner.setDisable(true);
+                } else if (choiceBox.getItems().get((Integer) t1).equals("Master")){
                     ectsTotal = 120;
+                    spinner.setOpacity(-1);
+                    spinner.setDisable(true);
+                } else {
+                    int initialValue = 180;
+                    spinner.setOpacity(1);
+                    spinner.setDisable(false);
+                    spinner.setEditable(true);
+                    SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 999, initialValue);
+                    spinner.setValueFactory(valueFactory);
+                    EventHandler<KeyEvent> enterKeyEventHandler;
+                    enterKeyEventHandler = new EventHandler<KeyEvent>() {
+                        @Override
+                        public void handle(KeyEvent keyEvent) {
+                            if (keyEvent.getCode() == KeyCode.ENTER){
+                                try{
+                                    Integer.parseInt(spinner.getEditor().textProperty().get());
+                                } catch (NumberFormatException e) {
+                                    spinner.getEditor().textProperty().set(Integer.toString(initialValue));
+                                }
+                            }
+                        }
+                    };
+                    spinner.getEditor().addEventHandler(KeyEvent.KEY_PRESSED, enterKeyEventHandler);
                 }
             }
         });
@@ -105,6 +134,9 @@ public class AddModuleDialogController {
     }
 
     public int getEctsTotal(){
+        if (choiceBox.getSelectionModel().getSelectedItem().equals("individual")){
+            return spinner.getValue();
+        }
         return ectsTotal;
     }
 

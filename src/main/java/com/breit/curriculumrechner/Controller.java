@@ -54,12 +54,12 @@ public class Controller {
 
     private boolean moduleView = CourseData.getInstance().getModuleView();
     private final ContextMenu contextMenu = new ContextMenu();
-    private Map<String, List<Pair<Course, StackPane>>> stackpaneMapByModules = new HashMap<>();
-    private Map<String, List<Pair<Course, StackPane>>> stackpaneMapBySemesters = new HashMap<>();
+    private Map<String, List<Pair<Course, StackPane>>> stackpaneMapByModules = new LinkedHashMap<>();
+    private Map<String, List<Pair<Course, StackPane>>> stackpaneMapBySemesters = new LinkedHashMap<>();
 
 
     public void initialize(){
-
+        ectsTotal.setText("/ 180");
         setChangeViewText();
 
         CheckBoxTreeItem<Object> root = new CheckBoxTreeItem<>("Root");
@@ -314,9 +314,6 @@ public class Controller {
         stackpaneMapBySemesters.get(Integer.toString(oldCourse.getSemester())).remove(new Pair<Course, StackPane>(oldCourse, coursePane));
         int moduleIdx = stackpaneMapByModules.get(oldCourse.getModuleName()).indexOf(new Pair<Course, StackPane>(oldCourse, coursePane));
         stackpaneMapByModules.get(oldCourse.getModuleName()).remove(new Pair<Course, StackPane>(oldCourse, coursePane));
-//        TilePane bla = (TilePane) coursePane.getParent();
-//        System.out.println(bla.getChildren().remove(coursePane));
-//        coursePane = createCoursePane(newCourse);
 
         coursePane.getChildren().clear();
         Rectangle rect = drawRectangle(newCourse);
@@ -324,11 +321,6 @@ public class Controller {
         drawCross(coursePane, newCourse, rect);
 
         putIntoStackPaneMaps(newCourse, coursePane);
-
-//        coursePane.getChildren().clear();
-//        Rectangle rect = drawRectangle(newCourse);
-//        createDescription(coursePane, newCourse, rect);
-//        drawCross(coursePane, newCourse, rect);
 
         String module = newCourse.getModuleName();
         CheckBoxTreeItem<Object> currentCourse = createCheckBoxCourse(newCourse);
@@ -379,30 +371,6 @@ public class Controller {
                 addOnMouseClick(framePane, coursePane, course);
             }
         }
-//        for (Pair<Course, StackPane> pair : stackpaneMapBySemesters.get(course.getOrdering(moduleView))){
-//            if (pair.getKey().equals(course)){
-//                TilePane framePane = createFramePane(course);  //framePane
-//
-//                if(allModules.contains(course.getOrdering(moduleView)) && moduleStack != null){
-//                    moduleStack.getChildren().add(framePane);
-//                    setTitleOfModule(moduleStack, course.getModuleName());
-//                }
-//
-//                framePane.getChildren().add(pair.getValue());
-//                addOnMouseClick(framePane, coursePane, course);
-//            }
-//        }
-
-
-//        TilePane framePane = createFramePane(course, coursePane);  //framePane
-//
-//        if(allModules.contains(course.getModuleName()) && moduleStack != null){
-//            moduleStack.getChildren().add(framePane);
-//            setTitleOfModule(moduleStack, course.getModuleName());
-//        }
-//
-//        framePane.getChildren().add(coursePane);
-//        addOnMouseClick(framePane, coursePane, course);
 
     }
 
@@ -419,42 +387,6 @@ public class Controller {
 
         putIntoStackPaneMaps(currentCourse, coursePane);
         return coursePane;
-
-
-
-  /*      if(allModules.contains(module)){
-            StackPane coursePane = new StackPane();
-            // RECTANGLE of course
-            Rectangle rect = drawRectangle(currentCourse);
-            //description on coursePane rectangle
-            createDescription(coursePane, currentCourse, rect);
-            //draw cross on coursePane
-            drawCross(coursePane, currentCourse, rect);
-            return coursePane;
-        } else {
-            StackPane coursePane = new StackPane();
-            // RECTANGLE of course
-            Rectangle rect = drawRectangle(currentCourse);
-            //description on coursePane rectangle
-            createDescription(coursePane, currentCourse, rect);
-            //draw cross on coursePane
-            drawCross(coursePane, currentCourse, rect);
-
-//            modulePane.getChildren().add(coursePane);
-            allModules.add(module);
-//            addOnMouseClick(modulePane, coursePane, currentCourse);
-//            tilePane.getChildren().add(moduleStack);
-
-
-//            if(stackpaneMapByModules.containsKey(module)){
-//                stackpaneMapByModules.get(module).add(new Pair<Course, StackPane>(currentCourse, coursePane));
-//            } else {
-//                List<Pair<Course, StackPane>> tmp = new ArrayList<>();
-//                tmp.add(new Pair<Course, StackPane>(currentCourse, coursePane));
-//                stackpaneMapByModules.putIfAbsent(module, tmp);
-//            }
-            return coursePane;
-        }*/
     }
 
     private void putIntoStackPaneMaps(Course currentCourse, StackPane coursePane) {
