@@ -27,21 +27,29 @@
         </MenuBar>
     </top>
     <right>
-        <VBox style="-fx-background-color: white">
-            <HBox>
-                <CheckBox fx:id="changeView" onAction="#changeView"/>
-            </HBox>
+        <VBox style="-fx-background-color: white" alignment="TOP_LEFT" >
+        <HBox>
+            <CheckBox fx:id="changeView" onAction="#changeView"/>
+        </HBox>
+
             <TreeView fx:id="courseTreeView" showRoot="false">
             </TreeView>
-            <HBox style="-fx-background-color: white">
-                <Label text="Total Ects: "/>
-                <Label fx:id="ectsCounter"/>
-                <Label fx:id="ectsTotal" />
-            </HBox>
+<!--            <HBox style="-fx-background-color: white">-->
+<!--                <Label text="Total Ects: "/>-->
+<!--                <Label fx:id="ectsCounter"/>-->
+<!--                <Label fx:id="ectsTotal" />-->
+<!--            </HBox>-->
         </VBox>
     </right>
     <center>
-        <TilePane hgap="10" vgap="10" fx:id="tilePane">
+        <TilePane hgap="10" vgap="10" fx:id="tilePane" alignment="CENTER">
         </TilePane>
     </center>
+    <bottom>
+        <HBox style="-fx-background-color: white" alignment="TOP_RIGHT">
+            <Label text="Total Ects: "/>
+            <Label fx:id="ectsCounter"/>
+            <Label fx:id="ectsTotal" />
+        </HBox>
+    </bottom>
 </BorderPane>

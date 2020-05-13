@@ -14,8 +14,6 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -79,20 +77,22 @@ public class AddModuleDialogController {
                     spinner.setEditable(true);
                     SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 999, initialValue);
                     spinner.setValueFactory(valueFactory);
-                    EventHandler<KeyEvent> enterKeyEventHandler;
-                    enterKeyEventHandler = new EventHandler<KeyEvent>() {
+
+                    spinner.getEditor().textProperty().addListener(new ChangeListener<String>() {
                         @Override
-                        public void handle(KeyEvent keyEvent) {
-                            if (keyEvent.getCode() == KeyCode.ENTER){
-                                try{
-                                    Integer.parseInt(spinner.getEditor().textProperty().get());
-                                } catch (NumberFormatException e) {
-                                    spinner.getEditor().textProperty().set(Integer.toString(initialValue));
+                        public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
+                            try{
+                                if (Integer.parseInt(newValue) > 999) {
+                                    spinner.getEditor().textProperty().set(String.valueOf(Integer.parseInt(oldValue)));
+                                    System.out.println("INPUT TOO HIGH");
+                                } else {
+                                    spinner.getEditor().textProperty().set(String.valueOf(Integer.parseInt(newValue)));
                                 }
+                            } catch (NumberFormatException e){
+                                spinner.getEditor().textProperty().set(String.valueOf(Integer.parseInt(oldValue)));
                             }
                         }
-                    };
-                    spinner.getEditor().addEventHandler(KeyEvent.KEY_PRESSED, enterKeyEventHandler);
+                    });;
                 }
             }
         });
