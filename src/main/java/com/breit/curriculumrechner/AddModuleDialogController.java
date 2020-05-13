@@ -82,7 +82,9 @@ public class AddModuleDialogController {
                         @Override
                         public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
                             try{
-                                if (Integer.parseInt(newValue) > 999) {
+                                if (newValue.equals("")){
+                                    spinner.getEditor().textProperty().set(String.valueOf(0));
+                                } else if (Integer.parseInt(newValue) > 999) {
                                     spinner.getEditor().textProperty().set(String.valueOf(Integer.parseInt(oldValue)));
                                     System.out.println("INPUT TOO HIGH");
                                 } else {
