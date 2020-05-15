@@ -21,8 +21,8 @@ public class Course {
         return color;
     }
 
-    public int getSemester() {
-        return semester;
+    public String getSemester() {
+        return Integer.toString(semester);
     }
 
     public void setSemester(int semester) {
@@ -61,7 +61,7 @@ public class Course {
         if (moduleView){
             return this.getModuleName();
         } else {
-            return Integer.toString(this.getSemester());
+            return this.getSemester();
         }
     }
 

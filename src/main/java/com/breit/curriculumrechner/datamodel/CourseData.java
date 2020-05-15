@@ -81,7 +81,7 @@ public class CourseData {
                 }
 
                 //fill by semester
-                if(coursesBySemester.containsKey(Integer.toString(course.getSemester()))){
+                if(coursesBySemester.containsKey(course.getSemester())){
                     List<Course> temp = coursesBySemester.get(Integer.toString(semester));
                     temp.add(course);
                     coursesBySemester.put(Integer.toString(semester), temp);
@@ -127,8 +127,8 @@ public class CourseData {
     }
 
     public boolean courseInSemester(Course course){
-        if(coursesBySemester.containsKey(Integer.toString(course.getSemester()))){
-            for (Course c : coursesBySemester.get(Integer.toString(course.getSemester()))){
+        if(coursesBySemester.containsKey(course.getSemester())){
+            for (Course c : coursesBySemester.get(course.getSemester())){
                 if (c.getCourseName().equals(course.getCourseName())){
                     return true;
                 }
@@ -138,11 +138,20 @@ public class CourseData {
     }
 
     public void setCourse(Course course){
+        setCourse(course, -1, -1);
+    }
+
+    public void setCourse(Course course, int moduleIdx, int semesterIdx){
 
         //module view
         String moduleName = course.getModuleName();
         if(coursesByModules.containsKey(moduleName)){
-            coursesByModules.get(moduleName).add(course);
+            if (moduleIdx == -1){
+                coursesByModules.get(moduleName).add(course);
+            } else {
+                coursesByModules.get(moduleName).add(moduleIdx, course);
+            }
+
         } else {
             List<Course> temp = new ArrayList<>();
             temp.add(course);
@@ -152,9 +161,14 @@ public class CourseData {
         System.out.println(coursesByModules);
 
         //semester view
-        String semester = Integer.toString(course.getSemester());
+        String semester = course.getSemester();
         if(coursesBySemester.containsKey(semester)){
-            coursesBySemester.get(semester).add(course);
+            if (semesterIdx == -1){
+                coursesBySemester.get(semester).add(course);
+            } else {
+                coursesBySemester.get(semester).add(semesterIdx, course);
+            }
+
         } else {
             List<Course> temp = new ArrayList<>();
             temp.add(course);

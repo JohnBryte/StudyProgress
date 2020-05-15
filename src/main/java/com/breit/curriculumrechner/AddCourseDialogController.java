@@ -32,7 +32,7 @@ public class AddCourseDialogController {
         moduleNameField.setText(course.getModuleName());
         courseNameField.setText(course.getCourseName());
         ectsField.setText(Integer.toString(course.getEcts()));
-        semesterField.setText(Integer.toString(course.getSemester()));
+        semesterField.setText(course.getSemester());
         colorPickerField.setValue(course.getColor());
         editing = true;
     }
