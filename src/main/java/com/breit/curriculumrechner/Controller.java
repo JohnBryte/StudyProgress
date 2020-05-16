@@ -257,23 +257,40 @@ public class Controller {
             moduleInTree.getChildren().remove(i);
             if (moduleInTree.getChildren().isEmpty()){
                 courseTreeView.getRoot().getChildren().remove(moduleIdx);
+                CourseData.getInstance().getCoursesByModules().remove(course.getModuleName());
             }
         }
     }
 
     private void deleteModuleFromPane(TilePane framePane, Course course){
-        if (moduleView){
-            String moduleName = course.getModuleName();
-            Pane moduleStack = (Pane) framePane.getParent().getParent();
-            moduleStack.getChildren().removeIf(o -> o.getId().equals("orderingStack" + moduleName));
-            allModules.remove(moduleName);
-            CourseData.getInstance().getCoursesByModules().remove(moduleName);
-        } else{
-            String semester = course.getSemester();
-            Pane semesterStack = (Pane) framePane.getParent().getParent();
-            semesterStack.getChildren().removeIf(o -> o.getId().equals("orderingStack" + semester));
-            CourseData.getInstance().getCoursesBySemester().remove(semester);
-        }
+//        if (moduleView){
+//            String moduleName = course.getModuleName();
+//            Pane moduleStack = (Pane) framePane.getParent().getParent();
+//            moduleStack.getChildren().removeIf(o -> o.getId().equals("orderingStack" + moduleName));
+//            allModules.remove(moduleName);
+//            CourseData.getInstance().getCoursesByModules().remove(moduleName);
+//        } else{
+//            String semester = course.getSemester();
+//            Pane semesterStack = (Pane) framePane.getParent().getParent();
+//            semesterStack.getChildren().removeIf(o -> o.getId().equals("orderingStack" + semester));
+//            allModules.remove(semester);
+//            CourseData.getInstance().getCoursesBySemester().remove(semester);
+//        }
+
+        String orderingName = course.getOrdering(moduleView);
+        Pane orderingStack = (Pane) framePane.getParent().getParent();
+        orderingStack.getChildren().removeIf(o -> o.getId().equals("orderingStack" + orderingName));
+        allModules.remove(orderingName);
+        System.out.println("FOO: " + CourseData.getInstance().getCoursesByModules());
+        CourseData.getInstance().getCourses().remove(orderingName);
+        System.out.println("BAR: " + CourseData.getInstance().getCoursesByModules());
+//        if (moduleView){
+//            CourseData.getInstance().getCoursesBySemester().get(course.getSemester()).remove(course);
+//        } else {
+//            System.out.println("FOO: " + CourseData.getInstance().getCoursesByModules());
+//            CourseData.getInstance().getCoursesByModules().get(course.getModuleName()).remove(course);
+//            System.out.println("BAR: " + CourseData.getInstance().getCoursesByModules());
+//        }
 
         for(Object o : courseTreeView.getRoot().getChildren()){
             CheckBoxTreeItem bla = (CheckBoxTreeItem) o;
@@ -431,10 +448,23 @@ public class Controller {
                 TilePane framePane = createFramePane(course);  //framePane
 
                 if (allModules.contains(course.getOrdering(moduleView)) && orderingStack != null) {
+                    System.out.println("ORDERING STACK: " + allModules);
                     orderingStack.getChildren().add(framePane);
                     setTitleOfModule(orderingStack, course.getOrdering(moduleView));
+/*                        if (course.getSemester().equals(allModules.toArray()[allModules.size()-1])){
+                            orderingStack.getChildren().add(framePane);
+                            setTitleOfModule(orderingStack, course.getOrdering(moduleView));
+                        }else {
+                            for (int i = 0; i < allModules.size(); i++){
+                                if (course.getSemester().equals(allModules.toArray()[i])){
+                                    System.out.println(orderingStack.getChildren());
+                                    orderingStack.getChildren().add(framePane);
+                                    setTitleOfModule(orderingStack, course.getOrdering(moduleView));
+                                }
+                            }
+                        }*/
                 }
-
+                System.out.println("FRAMEPANE: " + framePane.getChildren());
                 framePane.getChildren().add(pair.getValue());
                 addOnMouseClick(framePane, coursePane, course);
             }
@@ -735,7 +765,7 @@ public class Controller {
                 if(moduleNode.getId().equals("orderingStack" + courseOrdering)){
                     StackPane moduleStackPane = (StackPane) moduleNode;
                     int sz =  moduleStackPane.getChildren().size();
-//                    System.out.println(moduleStackPane.getChildren());
+                    System.out.println(moduleStackPane.getChildren());
                     TilePane modulePane = (TilePane) moduleStackPane.getChildren().get(0);
 //                    if(stackpaneMapByModules.containsKey(module)){
 //                        stackpaneMapByModules.get(module).add(new Pair<Course, StackPane>(course, coursePane));
@@ -769,7 +799,38 @@ public class Controller {
         StackPane orderingStack = new StackPane();
 //        setTitleOfModule(moduleStack, module);
         orderingStack.setId("orderingStack" + orderingBy);
-        tilePane.getChildren().add(orderingStack);
+        if (moduleView){
+            tilePane.getChildren().add(orderingStack);
+        } else {
+            if (tilePane.getChildren().isEmpty()){
+                tilePane.getChildren().add(orderingStack);
+            } else {
+                int semester = Integer.parseInt(course.getSemester());
+                boolean inserted = false;
+                for (int i = 0; i < tilePane.getChildren().size(); i++){
+                    int currentSemester = Integer.parseInt(tilePane.getChildren().get(i).getId().replace("orderingStack", ""));
+                    if (semester < currentSemester){
+                        tilePane.getChildren().add(i, orderingStack);
+                        inserted = true;
+                        break;
+                    }
+                }
+                if (!inserted){
+                    tilePane.getChildren().add(orderingStack);
+                }
+            }
+        }
+        /*if (course.getSemester().equals(allModules.toArray()[allModules.size()-1])){
+            orderingStack.getChildren().add(framePane);
+            setTitleOfModule(orderingStack, course.getOrdering(moduleView));
+        }else {
+            for (int i = 0; i < allModules.size(); i++){
+                if (course.getSemester().equals(allModules.toArray()[i])){
+                    orderingStack.getChildren().add(framePane);
+                    setTitleOfModule(orderingStack, course.getOrdering(moduleView));
+                }
+            }
+        }*/
         return orderingStack;
     }
 
