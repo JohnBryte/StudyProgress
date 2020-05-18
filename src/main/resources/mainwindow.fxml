@@ -27,18 +27,11 @@
         </MenuBar>
     </top>
     <right>
-        <VBox style="-fx-background-color: white" alignment="TOP_LEFT" >
-        <HBox>
-            <CheckBox fx:id="changeView" onAction="#changeView"/>
-        </HBox>
-
-            <TreeView fx:id="courseTreeView" showRoot="false">
-            </TreeView>
-<!--            <HBox style="-fx-background-color: white">-->
-<!--                <Label text="Total Ects: "/>-->
-<!--                <Label fx:id="ectsCounter"/>-->
-<!--                <Label fx:id="ectsTotal" />-->
-<!--            </HBox>-->
+        <VBox fx:id="vbox" style="-fx-background-color: white">
+            <HBox>
+                <CheckBox fx:id="changeView" onAction="#changeView" maxWidth="Infinity"/>
+            </HBox>
+            <TreeView fx:id="courseTreeView" showRoot="false"/>
         </VBox>
     </right>
     <center>
