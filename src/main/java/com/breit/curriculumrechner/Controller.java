@@ -728,25 +728,33 @@ public class Controller {
         Optional<ButtonType> result = dialog.showAndWait();
         if(result.isPresent() && result.get() == ButtonType.OK){
             Course newCourse = controller.processResults();
-            if (editing && (newCourse.getOrdering(moduleView).equals(course.getOrdering(moduleView)))){
+            boolean isInModule = CourseData.getInstance().courseInModule(newCourse);
+            if (editing && (newCourse.getOrdering(moduleView).equals(course.getOrdering(moduleView))) && !isInModule){
                 //newCourse.getOrdering(moduleView).equals(course.getOrdering(moduleView))
                 //edit course
                 //same module different course name
                 System.out.println("REAL EDITING");
                 edit(modulePane, coursePane, course, newCourse);
             } else {
-                if(editing){
-                    System.out.println("DELETE COURSE");
-                    deleteCourse(modulePane, coursePane, course);
-                }
-                //if not editing
-                //es fehlt noch ein else if wenn editing aber nicht derselbe moduleName
-                if(CourseData.getInstance().courseInModule(newCourse)){
+                if(isInModule){
                     System.out.println("OOPS COURSE ALREADY IN MODULE");
                 } else {
+                    if(editing){
+                        System.out.println("DELETE COURSE");
+                        deleteCourse(modulePane, coursePane, course);
+                    }
                     createCourseInPane(newCourse);
                     addCourseInTree(newCourse);
                 }
+
+                //if not editing
+                //es fehlt noch ein else if wenn editing aber nicht derselbe moduleName
+//                if(CourseData.getInstance().courseInModule(newCourse)){
+//                    System.out.println("OOPS COURSE ALREADY IN MODULE");
+//                } else {
+//                    createCourseInPane(newCourse);
+//                    addCourseInTree(newCourse);
+//                }
             }
             System.out.println("OK pressed");
 
